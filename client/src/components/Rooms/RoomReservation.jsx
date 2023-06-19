@@ -52,23 +52,23 @@ const RoomReservation = ({ roomData }) => {
   });
   // console.log(bookingInfo);
 
-  const modalHandler = () => {
-    addBookings(bookingInfo)
-      .then((data) => {
-        console.log(data);
-        updateStatus(roomData._id, true)
-        .then((data) => {
-          console.log(data)
-          toast.success("Your Booking has been confirmed.");
-          navigate('/dashboard/my-bookings')
-          closeModal();
-        });
-      })
-      .catch((error) => {
-        console.log(error.message);
-      });
-    console.log(bookingInfo);
-  };
+  // const modalHandler = () => {
+  //   addBookings(bookingInfo)
+  //     .then((data) => {
+  //       console.log(data);
+  //       updateStatus(roomData._id, true)
+  //       .then((data) => {
+  //         console.log(data)
+  //         toast.success("Your Booking has been confirmed.");
+  //         navigate('/dashboard/my-bookings')
+  //         closeModal();
+  //       });
+  //     })
+  //     .catch((error) => {
+  //       console.log(error.message);
+  //     });
+  //   console.log(bookingInfo);
+  // };
 
   return (
     <div className="bg-white rounded-xl border-[1px] border-neutral-200 overflow-hidden">
@@ -104,7 +104,6 @@ const RoomReservation = ({ roomData }) => {
       <BookingModal
         isOpen={isOpen}
         bookingInfo={bookingInfo}
-        modalHandler={modalHandler}
         closeModal={closeModal}
       ></BookingModal>
     </div>
