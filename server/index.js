@@ -1,11 +1,17 @@
 const express = require("express");
 const app = express();
-const morgan = require("morgan");
 const cors = require("cors");
+
+const morgan = require("morgan");
+
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
+
+const nodemailer = require('nodemailer');
+
 const port = process.env.PORT || 5000;
 const stripe = require("stripe")(process.env.PAYMENT_SECRET_KEY);
+
 
 // middleware
 const corsOptions = {
@@ -55,6 +61,36 @@ const verifyJWT = (req, res, next) => {
     next();
   });
 };
+
+
+// send email function
+const sendEmail = (emailData, emailAddress) => {
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL,
+      pass: process.env.GMAIL_PASS_KEY,
+    }
+  });
+
+  const mailOptions = {
+    from: process.env.GMAIL,
+    to: emailAddress,
+    subject: emailData.subject,
+    html: `<p>${emailData?.message}</p>`,
+  };
+
+  transporter.sendMail(mailOptions, function(error, info){
+    if (error) {
+   console.log(error);
+    } else {
+      console.log('Email sent: ' + info.response);
+      // do something useful
+    }
+  });
+}
+
+
 
 async function run() {
   try {
@@ -194,11 +230,28 @@ async function run() {
       res.send(result);
     });
 
-    // save bookings in database
+    // save booking in database
     app.post("/bookings", async (req, res) => {
-      const bookings = req.body;
-      // console.log(bookings);
-      const result = await bookingsCollection.insertOne(bookings);
+      const booking = req.body;
+      // console.log(booking);
+      const result = await bookingsCollection.insertOne(booking);
+
+      // send confirmation email to quest email address
+      sendEmail({
+        subject: 'Booking Successful!',
+        message: `Booking Id: ${result.insertedId}, TransactionId: ${result.transactionId}`
+      },
+      booking?.guest?.email
+      );
+
+      // send confirmation email to host email address
+      sendEmail({
+        subject: 'Your room got booked!',
+        message: `Booking Id: ${result.insertedId}, TransactionId: ${result.transactionId}`
+      },
+      booking?.host
+      )
+
       res.send(result);
     });
 
